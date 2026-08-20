@@ -25,15 +25,23 @@ const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
+const normalizeOrigin = (value) => String(value).trim().replace(/\/$/, '');
+
+const envOrigins = [
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  ...(process.env.CLIENT_URLS || '').split(','),
+].filter(Boolean).map(normalizeOrigin);
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  process.env.CLIENT_URL,
-].filter(Boolean).map((value) => value.replace(/\/$/, ''));
+  ...envOrigins,
+];
 
 const isAllowedOrigin = (origin) => {
   if (!origin) return true;
-  const normalizedOrigin = origin.replace(/\/$/, '');
+  const normalizedOrigin = normalizeOrigin(origin);
   if (allowedOrigins.includes(normalizedOrigin)) return true;
 
   try {
@@ -51,21 +59,22 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Security & parsing middleware
 app.use(helmet());
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (isAllowedOrigin(origin)) {
-        callback(null, true);
-        return;
-      }
+const corsOptions = {
+  origin(origin, callback) {
+    if (isAllowedOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
 
-      callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(mongoSanitize());
