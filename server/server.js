@@ -25,6 +25,25 @@ const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  process.env.CLIENT_URL,
+].filter(Boolean).map((value) => value.replace(/\/$/, ''));
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  const normalizedOrigin = origin.replace(/\/$/, '');
+  if (allowedOrigins.includes(normalizedOrigin)) return true;
+
+  try {
+    const hostname = new URL(normalizedOrigin).hostname;
+    return hostname === 'localhost' || hostname.endsWith('.vercel.app');
+  } catch {
+    return false;
+  }
+};
+
 // Connect to MongoDB (skipped automatically under test - see __tests__ setup)
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
@@ -34,8 +53,17 @@ if (process.env.NODE_ENV !== 'test') {
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 app.use(express.json({ limit: '2mb' }));
