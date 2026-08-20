@@ -70,23 +70,23 @@ const Reports = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Reports</h1>
           <p className="text-sm text-gray-500">Review your patterns and download a copy for your records.</p>
         </div>
-        <div className="flex gap-2">
-          <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-            <button className={`px-4 py-2 text-sm ${tab === 'monthly' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-900'}`} onClick={() => setTab('monthly')}>Monthly</button>
-            <button className={`px-4 py-2 text-sm ${tab === 'yearly' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-900'}`} onClick={() => setTab('yearly')}>Yearly</button>
+        <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto">
+          <div className="col-span-2 flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 sm:col-span-1">
+            <button className={`flex-1 px-4 py-2 text-sm ${tab === 'monthly' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-900'}`} onClick={() => setTab('monthly')}>Monthly</button>
+            <button className={`flex-1 px-4 py-2 text-sm ${tab === 'yearly' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-900'}`} onClick={() => setTab('yearly')}>Yearly</button>
           </div>
           {tab === 'monthly' && (
-            <select className="input !w-auto" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+            <select className="input min-w-0" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
               {MONTH_NAMES.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
             </select>
           )}
-          <input type="number" className="input !w-24" value={year} onChange={(e) => setYear(Number(e.target.value))} />
-          <button className="btn-secondary" onClick={handleExport} disabled={loading || (tab === 'monthly' ? !monthlyReport : !yearlyReport)} title="Download report as CSV">
+          <input type="number" className="input min-w-0 sm:!w-24" value={year} onChange={(e) => setYear(Number(e.target.value))} />
+          <button className="btn-secondary col-span-2 sm:col-span-1" onClick={handleExport} disabled={loading || (tab === 'monthly' ? !monthlyReport : !yearlyReport)} title="Download report as CSV">
             <Download size={16} />
             <span className="hidden sm:inline">Export</span>
           </button>
@@ -98,17 +98,17 @@ const Reports = () => {
       ) : tab === 'monthly' && monthlyReport ? (
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="card p-4"><p className="text-xs text-gray-500">Income</p><p className="text-lg font-semibold text-green-600">{formatCurrency(monthlyReport.income, user?.currency)}</p></div>
-            <div className="card p-4"><p className="text-xs text-gray-500">Expenses</p><p className="text-lg font-semibold text-red-600">{formatCurrency(monthlyReport.expenses, user?.currency)}</p></div>
-            <div className="card p-4"><p className="text-xs text-gray-500">Savings</p><p className="text-lg font-semibold">{formatCurrency(monthlyReport.savings, user?.currency)}</p></div>
-            <div className="card p-4"><p className="text-xs text-gray-500">Savings Rate</p><p className="text-lg font-semibold">{monthlyReport.savingsRate}%</p></div>
+            <div className="card min-w-0 p-3 sm:p-4"><p className="text-xs text-gray-500">Income</p><p className="text-lg font-semibold break-words text-green-600">{formatCurrency(monthlyReport.income, user?.currency)}</p></div>
+            <div className="card min-w-0 p-3 sm:p-4"><p className="text-xs text-gray-500">Expenses</p><p className="text-lg font-semibold break-words text-red-600">{formatCurrency(monthlyReport.expenses, user?.currency)}</p></div>
+            <div className="card min-w-0 p-3 sm:p-4"><p className="text-xs text-gray-500">Savings</p><p className="text-lg font-semibold break-words">{formatCurrency(monthlyReport.savings, user?.currency)}</p></div>
+            <div className="card min-w-0 p-3 sm:p-4"><p className="text-xs text-gray-500">Savings Rate</p><p className="text-lg font-semibold break-words">{monthlyReport.savingsRate}%</p></div>
           </div>
 
           {monthlyReport.insights.length > 0 && (
-            <div className="card p-4 space-y-2">
+            <div className="card p-4 space-y-2 min-w-0">
               <h3 className="font-medium mb-1">Insights</h3>
               {monthlyReport.insights.map((ins, i) => (
-                <p key={i} className={`text-sm ${ins.type === 'danger' ? 'text-red-600' : ins.type === 'warning' ? 'text-amber-600' : ins.type === 'positive' ? 'text-green-600' : 'text-gray-600 dark:text-gray-400'}`}>
+                <p key={i} className={`text-sm break-words ${ins.type === 'danger' ? 'text-red-600' : ins.type === 'warning' ? 'text-amber-600' : ins.type === 'positive' ? 'text-green-600' : 'text-gray-600 dark:text-gray-400'}`}>
                   • {ins.message}
                 </p>
               ))}
@@ -116,7 +116,7 @@ const Reports = () => {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="card p-4">
+            <div className="card min-w-0 overflow-hidden p-4">
               <h3 className="font-medium mb-3">Category Breakdown</h3>
               {monthlyReport.categoryBreakdown.length === 0 ? (
                 <p className="text-sm text-gray-500">No expenses this month.</p>
@@ -132,7 +132,7 @@ const Reports = () => {
                 </ResponsiveContainer>
               )}
             </div>
-            <div className="card p-4">
+            <div className="card min-w-0 overflow-hidden p-4">
               <h3 className="font-medium mb-3">Income vs Expense (Daily)</h3>
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={monthlyReport.dailySeries}>
@@ -150,16 +150,16 @@ const Reports = () => {
       ) : tab === 'yearly' && yearlyReport ? (
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="card p-4"><p className="text-xs text-gray-500">Total Income</p><p className="text-lg font-semibold text-green-600">{formatCurrency(yearlyReport.totalIncome, user?.currency)}</p></div>
-            <div className="card p-4"><p className="text-xs text-gray-500">Total Expenses</p><p className="text-lg font-semibold text-red-600">{formatCurrency(yearlyReport.totalExpenses, user?.currency)}</p></div>
-            <div className="card p-4"><p className="text-xs text-gray-500">Total Savings</p><p className="text-lg font-semibold">{formatCurrency(yearlyReport.totalSavings, user?.currency)}</p></div>
-            <div className="card p-4"><p className="text-xs text-gray-500">Avg Monthly Savings</p><p className="text-lg font-semibold">{formatCurrency(yearlyReport.averageMonthlySavings, user?.currency)}</p></div>
+            <div className="card min-w-0 p-3 sm:p-4"><p className="text-xs text-gray-500">Total Income</p><p className="text-lg font-semibold break-words text-green-600">{formatCurrency(yearlyReport.totalIncome, user?.currency)}</p></div>
+            <div className="card min-w-0 p-3 sm:p-4"><p className="text-xs text-gray-500">Total Expenses</p><p className="text-lg font-semibold break-words text-red-600">{formatCurrency(yearlyReport.totalExpenses, user?.currency)}</p></div>
+            <div className="card min-w-0 p-3 sm:p-4"><p className="text-xs text-gray-500">Total Savings</p><p className="text-lg font-semibold break-words">{formatCurrency(yearlyReport.totalSavings, user?.currency)}</p></div>
+            <div className="card min-w-0 p-3 sm:p-4"><p className="text-xs text-gray-500">Avg Monthly Savings</p><p className="text-lg font-semibold break-words">{formatCurrency(yearlyReport.averageMonthlySavings, user?.currency)}</p></div>
           </div>
-          <div className="flex gap-4 text-sm text-gray-500">
+          <div className="flex flex-col gap-1 text-sm text-gray-500 sm:flex-row sm:gap-4">
             {yearlyReport.bestSavingMonth && <p>Best saving month: <span className="font-medium text-gray-800 dark:text-gray-200">{MONTH_NAMES[yearlyReport.bestSavingMonth - 1]}</span></p>}
             {yearlyReport.highestExpenseMonth && <p>Highest expense month: <span className="font-medium text-gray-800 dark:text-gray-200">{MONTH_NAMES[yearlyReport.highestExpenseMonth - 1]}</span></p>}
           </div>
-          <div className="card p-4">
+          <div className="card min-w-0 overflow-hidden p-4">
             <h3 className="font-medium mb-3">Monthly Income vs Expenses</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={yearlyReport.months.map((m) => ({ ...m, name: MONTH_NAMES[m.month - 1].slice(0, 3) }))}>
