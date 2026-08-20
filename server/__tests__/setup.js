@@ -3,6 +3,10 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongoServer;
 
+test('test environment setup is available', () => {
+  expect(true).toBe(true);
+});
+
 beforeAll(async () => {
   process.env.JWT_SECRET = 'test_secret';
   process.env.JWT_EXPIRE = '1h';

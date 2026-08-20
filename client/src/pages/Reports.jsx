@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from 'recharts';
+import { Download } from 'lucide-react';
 import { reportService } from '../services/reportService';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage } from '../services/api';
@@ -35,10 +36,45 @@ const Reports = () => {
     else loadYearly();
   }, [tab, loadMonthly, loadYearly]);
 
+  const handleExport = () => {
+    const rows = tab === 'monthly'
+      ? [
+        ['Report', `${MONTH_NAMES[month - 1]} ${year}`],
+        ['Income', monthlyReport.income],
+        ['Expenses', monthlyReport.expenses],
+        ['Savings', monthlyReport.savings],
+        ['Savings Rate', `${monthlyReport.savingsRate}%`],
+        [],
+        ['Category', 'Amount'],
+        ...monthlyReport.categoryBreakdown.map((category) => [category.name, category.total]),
+      ]
+      : [
+        ['Report', `${year}`],
+        ['Total Income', yearlyReport.totalIncome],
+        ['Total Expenses', yearlyReport.totalExpenses],
+        ['Total Savings', yearlyReport.totalSavings],
+        ['Average Monthly Savings', yearlyReport.averageMonthlySavings],
+        [],
+        ['Month', 'Income', 'Expenses', 'Savings'],
+        ...yearlyReport.months.map((item) => [MONTH_NAMES[item.month - 1], item.income, item.expense, item.savings]),
+      ];
+
+    const csv = rows.map((row) => row.map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${tab}-report-${year}${tab === 'monthly' ? `-${String(month).padStart(2, '0')}` : ''}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">Reports</h1>
+        <div>
+          <h1 className="text-xl font-semibold">Reports</h1>
+          <p className="text-sm text-gray-500">Review your patterns and download a copy for your records.</p>
+        </div>
         <div className="flex gap-2">
           <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
             <button className={`px-4 py-2 text-sm ${tab === 'monthly' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-900'}`} onClick={() => setTab('monthly')}>Monthly</button>
@@ -50,6 +86,10 @@ const Reports = () => {
             </select>
           )}
           <input type="number" className="input !w-24" value={year} onChange={(e) => setYear(Number(e.target.value))} />
+          <button className="btn-secondary" onClick={handleExport} disabled={loading || (tab === 'monthly' ? !monthlyReport : !yearlyReport)} title="Download report as CSV">
+            <Download size={16} />
+            <span className="hidden sm:inline">Export</span>
+          </button>
         </div>
       </div>
 

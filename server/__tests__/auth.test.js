@@ -43,4 +43,25 @@ describe('Auth', () => {
     expect(res.statusCode).toBe(401);
     expect(res.body.success).toBe(false);
   });
+
+  it('marks a newly registered user as needing onboarding and allows completion', async () => {
+    const registerRes = await request(app).post('/api/auth/register').send(userPayload);
+    expect(registerRes.statusCode).toBe(201);
+    expect(registerRes.body.data.user.onboardingCompleted).toBe(false);
+
+    const loginRes = await request(app)
+      .post('/api/auth/login')
+      .send({ email: userPayload.email, password: userPayload.password });
+
+    const res = await request(app)
+      .put('/api/users/profile')
+      .set('Authorization', `Bearer ${loginRes.body.data.token}`)
+      .send({ currency: 'USD', monthlyIncome: 4000, onboardingCompleted: true });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.user.currency).toBe('USD');
+    expect(res.body.data.user.monthlyIncome).toBe(4000);
+    expect(res.body.data.user.onboardingCompleted).toBe(true);
+  });
 });

@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await authService.login({ email, password });
       persistSession(res.data.user, res.data.token);
-      return { success: true };
+      return { success: true, user: res.data.user };
     } catch (error) {
       return { success: false, message: getErrorMessage(error) };
     }
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await authService.register(payload);
       persistSession(res.data.user, res.data.token);
-      return { success: true };
+      return { success: true, user: res.data.user };
     } catch (error) {
       return { success: false, message: getErrorMessage(error) };
     }

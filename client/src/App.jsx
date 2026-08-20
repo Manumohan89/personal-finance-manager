@@ -17,6 +17,7 @@ import Recurring from './pages/Recurring';
 import Reports from './pages/Reports';
 import Categories from './pages/Categories';
 import Settings from './pages/Settings';
+import Onboarding from './pages/Onboarding';
 import NotFound from './pages/NotFound';
 
 // Redirects already-authenticated users away from public auth pages.
@@ -34,6 +35,7 @@ const AppRoutes = () => (
     <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
     <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
     <Route path="/reset-password/:token" element={<PublicOnlyRoute><ResetPassword /></PublicOnlyRoute>} />
+    <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
 
     <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Dashboard />} />

@@ -15,6 +15,8 @@ const userSchema = new mongoose.Schema(
     },
     password: { type: String, required: [true, 'Password is required'], minlength: 8, select: false },
     currency: { type: String, default: 'INR' },
+    monthlyIncome: { type: Number, default: 0 },
+    onboardingCompleted: { type: Boolean, default: false },
     theme: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
     avatarColor: { type: String, default: '#4F46E5' },
     resetPasswordToken: { type: String, select: false },

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Wallet, TrendingUp, TrendingDown, PiggyBank, AlertTriangle } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, PiggyBank, AlertTriangle, Lightbulb, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { dashboardService } from '../services/dashboardService';
 import { budgetService } from '../services/budgetService';
 import { transactionService } from '../services/transactionService';
+import { reportService } from '../services/reportService';
 import { useAuth } from '../context/AuthContext';
 import StatCard from '../components/StatCard';
 import Spinner from '../components/Spinner';
@@ -21,23 +22,27 @@ const Dashboard = () => {
   const [categoryBreakdown, setCategoryBreakdown] = useState([]);
   const [dailySeries, setDailySeries] = useState([]);
   const [budgetAlerts, setBudgetAlerts] = useState([]);
+  const [reportInsights, setReportInsights] = useState([]);
   const [recentTx, setRecentTx] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
+    const now = new Date();
     Promise.all([
       dashboardService.summary(),
       dashboardService.categories(),
       dashboardService.monthly(),
       budgetService.list(),
       transactionService.list({ limit: 6, sortBy: 'date', sortOrder: 'desc' }),
+      reportService.monthly(now.getFullYear(), now.getMonth() + 1),
     ])
-      .then(([summaryRes, catRes, monthlyRes, budgetRes, txRes]) => {
+      .then(([summaryRes, catRes, monthlyRes, budgetRes, txRes, reportRes]) => {
         setSummary(summaryRes.data);
         setCategoryBreakdown(catRes.data.breakdown);
         setDailySeries(monthlyRes.data.series);
         setBudgetAlerts(budgetRes.data.budgets.filter((b) => b.status !== 'ok'));
+        setReportInsights(reportRes.data.insights || []);
         setRecentTx(txRes.data.transactions);
       })
       .catch((err) => toast.error(getErrorMessage(err)))
@@ -59,16 +64,39 @@ const Dashboard = () => {
         <p className="text-sm text-gray-500">Here&apos;s your financial overview</p>
       </div>
 
-      {budgetAlerts.length > 0 && (
-        <div className="card p-4 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10 space-y-1">
-          {budgetAlerts.map((b) => (
-            <div key={b._id} className="flex items-center gap-2 text-sm text-amber-800 dark:text-amber-300">
-              <AlertTriangle size={14} />
-              {b.status === 'exceeded'
-                ? `You have exceeded your ${b.category.name} budget.`
-                : `${b.category.name} budget is ${b.percentage}% used.`}
-            </div>
-          ))}
+      {(budgetAlerts.length > 0 || reportInsights.length > 0) && (
+        <div className="card p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Lightbulb size={16} className="text-primary-600" />
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Financial insights</h2>
+          </div>
+
+          <div className="space-y-2">
+            {budgetAlerts.map((b) => (
+              <div key={b._id} className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/10 dark:text-amber-300">
+                <AlertTriangle size={14} />
+                {b.status === 'exceeded'
+                  ? `You have exceeded your ${b.category.name} budget.`
+                  : `${b.category.name} budget is ${b.percentage}% used.`}
+              </div>
+            ))}
+
+            {reportInsights.map((insight, index) => {
+              const config = {
+                info: { className: 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-900/10 dark:text-blue-300', icon: <ArrowUpRight size={14} /> },
+                positive: { className: 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/10 dark:text-emerald-300', icon: <ArrowUpRight size={14} /> },
+                warning: { className: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-900/10 dark:text-amber-300', icon: <AlertTriangle size={14} /> },
+                danger: { className: 'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300', icon: <ArrowDownRight size={14} /> },
+              }[insight.type] || { className: 'border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-300', icon: <Lightbulb size={14} /> };
+
+              return (
+                <div key={`${insight.type}-${index}`} className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${config.className}`}>
+                  {config.icon}
+                  {insight.message}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

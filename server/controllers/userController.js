@@ -11,12 +11,14 @@ const getProfile = asyncHandler(async (req, res) => {
 // @desc  Update profile
 // @route PUT /api/users/profile
 const updateProfile = asyncHandler(async (req, res) => {
-  const { name, currency, theme, notificationPrefs } = req.body;
+  const { name, currency, theme, monthlyIncome, onboardingCompleted, notificationPrefs } = req.body;
   const user = await User.findById(req.user._id);
 
   if (name !== undefined) user.name = name;
   if (currency !== undefined) user.currency = currency;
   if (theme !== undefined) user.theme = theme;
+  if (monthlyIncome !== undefined) user.monthlyIncome = Number(monthlyIncome) || 0;
+  if (onboardingCompleted !== undefined) user.onboardingCompleted = Boolean(onboardingCompleted);
   if (notificationPrefs !== undefined) {
     user.notificationPrefs = { ...user.notificationPrefs.toObject(), ...notificationPrefs };
   }
