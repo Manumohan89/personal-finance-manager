@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# env files
+.env
+.env.*
+!.env.example
+
+# build output
+client/dist/
+coverage/
+
+# editor / system
+.DS_Store
+.vite/
+.vscode/
