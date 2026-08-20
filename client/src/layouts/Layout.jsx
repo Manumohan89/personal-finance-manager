@@ -19,7 +19,10 @@ const Layout = () => {
         <main className="flex-1 p-4 lg:p-6 pb-24 lg:pb-6">
           <Outlet context={{ refreshKey, triggerRefresh: handleSaved }} />
         </main>
-        <MobileNav onQuickAdd={() => setQuickAdd('expense')} />
+        <MobileNav
+          onQuickAddExpense={() => setQuickAdd('expense')}
+          onQuickAddIncome={() => setQuickAdd('income')}
+        />
       </div>
 
       <QuickAddModal
