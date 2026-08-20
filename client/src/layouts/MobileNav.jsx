@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Receipt, Plus, Wallet, Target } from 'lucide-react';
+import { LayoutDashboard, Receipt, Plus, Wallet, Target, MoreHorizontal, Repeat, BarChart3, Tags, Settings } from 'lucide-react';
 
 const MobileNav = ({ onQuickAddExpense, onQuickAddIncome }) => {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [quickMenuOpen, setQuickMenuOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
   const links = [
     { to: '/dashboard', label: 'Home', icon: LayoutDashboard },
@@ -12,6 +13,12 @@ const MobileNav = ({ onQuickAddExpense, onQuickAddIncome }) => {
   const rightLinks = [
     { to: '/budgets', label: 'Budgets', icon: Wallet },
     { to: '/goals', label: 'Goals', icon: Target },
+  ];
+  const moreLinks = [
+    { to: '/recurring', label: 'Recurring', icon: Repeat },
+    { to: '/reports', label: 'Reports', icon: BarChart3 },
+    { to: '/categories', label: 'Categories', icon: Tags },
+    { to: '/settings', label: 'Settings', icon: Settings },
   ];
 
   const Item = ({ to, label, icon: Icon }) => (
@@ -33,20 +40,20 @@ const MobileNav = ({ onQuickAddExpense, onQuickAddIncome }) => {
       {links.map((l) => <Item key={l.to} {...l} />)}
       <div className="flex-1 flex justify-center relative">
         <button
-          onClick={() => setMenuOpen((open) => !open)}
+          onClick={() => setQuickMenuOpen((open) => !open)}
           className="w-12 h-12 -mt-5 rounded-full bg-primary-600 text-white shadow-lg flex items-center justify-center"
           aria-label="Quick add menu"
         >
           <Plus size={24} />
         </button>
 
-        {menuOpen && (
+        {quickMenuOpen && (
           <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-40 card py-1 z-20 shadow-lg">
             <button
               className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
               onClick={() => {
                 onQuickAddExpense();
-                setMenuOpen(false);
+                setQuickMenuOpen(false);
               }}
             >
               Add Expense
@@ -55,7 +62,7 @@ const MobileNav = ({ onQuickAddExpense, onQuickAddIncome }) => {
               className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
               onClick={() => {
                 onQuickAddIncome();
-                setMenuOpen(false);
+                setQuickMenuOpen(false);
               }}
             >
               Add Income
@@ -64,6 +71,36 @@ const MobileNav = ({ onQuickAddExpense, onQuickAddIncome }) => {
         )}
       </div>
       {rightLinks.map((l) => <Item key={l.to} {...l} />)}
+      <div className="flex-1 flex justify-center relative">
+        <button
+          onClick={() => setMoreMenuOpen((open) => !open)}
+          className={`flex flex-col items-center justify-center gap-0.5 py-2 text-xs ${
+            moreLinks.some((link) => window.location.pathname === link.to) ? 'text-primary-600' : 'text-gray-500 dark:text-gray-400'
+          }`}
+          aria-label="More navigation options"
+          aria-expanded={moreMenuOpen}
+        >
+          <MoreHorizontal size={20} />
+          More
+        </button>
+        {moreMenuOpen && (
+          <div className="absolute bottom-16 right-0 w-44 card py-1 z-20 shadow-lg">
+            {moreLinks.map(({ to, label, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setMoreMenuOpen(false)}
+                className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 text-sm ${
+                  isActive ? 'text-primary-600 bg-primary-50 dark:bg-primary-900/20' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                <Icon size={17} />
+                {label}
+              </NavLink>
+            ))}
+          </div>
+        )}
+      </div>
     </nav>
   );
 };
